@@ -206,10 +206,10 @@ public class Explorer {
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
         }
-        // Count how many times for no fail
-        
+        // Count how many times for no fail, need function for calculating path weight
+
          for (Node child : state.getCurrentNode().getNeighbours()) {
-              if(child.getTile().getGold() > 0){
+              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > lengthRemaining(path, node)){
                state.moveTo(child);
                state.pickUpGold();
                state.moveTo(node);
@@ -263,5 +263,24 @@ private void findShortestRoute(Node node) {
   return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
 }
 
+ private int lengthRemaining(List<Node> path, Node currentNode) {
+  boolean countNode = false;
+  int length = 0;
+  for (Node node : path) {
+    if (countNode == true){
+      for (Node neighbour : node.getNeighbours()){
+        if(path.contains(neighbour)){
+          length += node.getEdge(neighbour).length();
+        }
+      }
+      
+    }
+
+    if(node == currentNode){
+      countNode = true;
+    }
+  }
+  return length;
+ }
 }
 
