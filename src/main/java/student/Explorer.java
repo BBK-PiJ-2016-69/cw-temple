@@ -209,7 +209,7 @@ public class Explorer {
         // Count how many times for no fail, need function for calculating path weight
 
          for (Node child : state.getCurrentNode().getNeighbours()) {
-              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > lengthRemaining(path, node)){
+              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + child.getEdge(node).length())){
                state.moveTo(child);
                state.pickUpGold();
                state.moveTo(node);
