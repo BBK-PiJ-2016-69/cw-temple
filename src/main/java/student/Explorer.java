@@ -6,6 +6,8 @@ import game.NodeStatus;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 
 public class Explorer {
 
@@ -41,36 +43,42 @@ public class Explorer {
    */
   public void explore(ExplorationState state) {
 
-    System.out.println("My Location: "+state.getCurrentLocation());
-    System.out.println("Distance to Target: "+state.getDistanceToTarget());
+  //  System.out.println("My Location: "+state.getCurrentLocation());
+ //   System.out.println("Distance to Target: "+state.getDistanceToTarget());
     
     List visited = new ArrayList();
     List toVisit = new ArrayList();
 
     int i = 0;
-    NodeStatus max = null;
-    Map<Long, int> visitedTimes = new TreeMap<Long, String>();
+    int max = 0;
+    NodeStatus min = null;
+    Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
     boolean moved;
-    while(state.getDistanceToTarget() > 0 && i < 50){
+    while(state.getDistanceToTarget() > 0 && i < 100000){
       moved = false;
       i++;
 
-    System.out.println("------------Neighbours-----------");
+   /*  System.out.println("------------Neighbours-----------");
     for (NodeStatus neighbour : state.getNeighbours()) {
       System.out.println(neighbour.getId() + " \\ "+neighbour.getDistanceToTarget());
     }
-    System.out.println("---------------------------------");
+    System.out.println("---------------------------------"); */
     
     for (NodeStatus neighbour : state.getNeighbours()) {
       if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
-        System.out.println("Moving based on being closer and no having visisted.");
-        System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
+        // System.out.println("Moving based on being closer and no having visisted.");
+        // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
-        if(map.get(neighbour.getId() == null)){
-          map.put(neighbour,getId(), "One");
+        if(visitedTimes.get(neighbour.getId()) == null){
+          visitedTimes.put(neighbour.getId(), 1);
         }
-        state.moveTo(neighbour.getId());
+        else
+        {
+          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
+        }
+          state.moveTo(neighbour.getId());
+        
         break;
       }
     }
@@ -78,10 +86,17 @@ public class Explorer {
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
-        System.out.println("Moving based on equivalent distance and not visisted");
-        System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
+       // System.out.println("Moving based on equivalent distance and not visisted");
+        // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
+        if(visitedTimes.get(neighbour.getId()) == null){
+          visitedTimes.put(neighbour.getId(), 1);
+        }
+        else
+        {
+          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
+        }
         state.moveTo(neighbour.getId());
         break;
       }
@@ -92,10 +107,17 @@ public class Explorer {
       for (NodeStatus neighbour : state.getNeighbours()) {
 
        if(!visited.contains(neighbour.getId())){
-        System.out.println("Moving based on not haing visited");
-        System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
+       // System.out.println("Moving based on not haing visited");
+       // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
+        if(visitedTimes.get(neighbour.getId()) == null){
+          visitedTimes.put(neighbour.getId(), 1);
+        }
+        else
+        {
+          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
+        }
         state.moveTo(neighbour.getId());
         break;
       }
@@ -105,21 +127,31 @@ public class Explorer {
   if(!moved) { 
 
       for (NodeStatus neighbour : state.getNeighbours()) {
-        if(max == null){ max = neighbour; }
-        if (neighbour.getId() > max.getId()){
-          max = neighbour;
+        if(min == null){ min = neighbour; }
+        if (visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
+          min = neighbour;
         }
       }
-        System.out.println("Moving based on max");
-        System.out.println("Moving to: " + max.getId() + "// Distance: " + max.getDistanceToTarget());
+       // System.out.println("Moving based on min");
+       // System.out.println("Moving to: " + min.getId() + "// Distance: " + min.getDistanceToTarget());
         moved = true;
-        visited.add(max.getId());
-        state.moveTo(max.getId());
-        max = null;
+        visited.add(min.getId());
+        if(visitedTimes.get(min.getId()) == null){
+          visitedTimes.put(min.getId(), 1);
+        }
+        else
+        {
+          if(visitedTimes.get(min.getId()) + 1 > max) { max = visitedTimes.get(min.getId()) + 1; }
+          visitedTimes.put(min.getId(), visitedTimes.get(min.getId()) + 1);
+        }
+        state.moveTo(min.getId());
+        min = null;
    }
 
     
   }
+  System.out.println(" -- Moves: " + i + " ---");
+  System.out.println(" -- Max: " + max + " ---");
     //TODO:
   }
 
