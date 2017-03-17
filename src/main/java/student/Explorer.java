@@ -72,16 +72,9 @@ public class Explorer {
       moved = false;
       i++;
 
-   /*  System.out.println("------------Neighbours-----------");
-    for (NodeStatus neighbour : state.getNeighbours()) {
-      System.out.println(neighbour.getId() + " \\ "+neighbour.getDistanceToTarget());
-    }
-    System.out.println("---------------------------------"); */
     
     for (NodeStatus neighbour : state.getNeighbours()) {
       if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
-        // System.out.println("Moving based on being closer and no having visisted.");
-        // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
         if(visitedTimes.get(neighbour.getId()) == null){
@@ -100,8 +93,6 @@ public class Explorer {
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
-       // System.out.println("Moving based on equivalent distance and not visisted");
-        // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
         if(visitedTimes.get(neighbour.getId()) == null){
@@ -121,8 +112,6 @@ public class Explorer {
       for (NodeStatus neighbour : state.getNeighbours()) {
 
        if(!visited.contains(neighbour.getId())){
-       // System.out.println("Moving based on not haing visited");
-       // System.out.println("Moving to: " + neighbour.getId() + "// Distance: " + neighbour.getDistanceToTarget());
         moved = true;
         visited.add(neighbour.getId());
         if(visitedTimes.get(neighbour.getId()) == null){
@@ -146,8 +135,6 @@ public class Explorer {
           min = neighbour;
         }
       }
-       // System.out.println("Moving based on min");
-       // System.out.println("Moving to: " + min.getId() + "// Distance: " + min.getDistanceToTarget());
         moved = true;
         visited.add(min.getId());
         if(visitedTimes.get(min.getId()) == null){
@@ -166,7 +153,6 @@ public class Explorer {
   }
   System.out.println(" -- Moves: " + i + " ---");
   System.out.println(" -- Max: " + max + " ---");
-    //TODO:
   }
 
   /**
