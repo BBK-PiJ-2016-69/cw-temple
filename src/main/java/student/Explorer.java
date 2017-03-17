@@ -206,13 +206,15 @@ public class Explorer {
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
         }
-
+        // Count how many times for no fail
+        
          for (Node child : state.getCurrentNode().getNeighbours()) {
-           if(child.getTile().getGold() > 0){
-             state.moveTo(child);
-             state.pickUpGold();
-             state.moveTo(node);
+              if(child.getTile().getGold() > 0){
+               state.moveTo(child);
+               state.pickUpGold();
+               state.moveTo(node);
            }
+          
          }
 
       }
