@@ -19,7 +19,11 @@ import java.util.TreeMap;
 
 public class Explorer {
 
-
+  Set<Node> visitedNodes = new HashSet<Node>();
+  Set<Node> unvisitedNodes = new HashSet<Node>();
+  Map<Node, Integer> distance = new HashMap<Node, Integer>();
+  Map<Node, Node> prev = new HashMap<Node, Node>();
+  List<Node> nodes = null;
 
   /**
    * Explore the cavern, trying to find the orb in as few steps as possible.
@@ -191,8 +195,23 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
+   /* Dijkstra implementation */
+   System.out.println("START: " +state.getCurrentNode().getId());
+
+   nodes = new ArrayList<Node>(state.getVertices());
    
-   
+   distance.put(state.getExit(), 0);
+   unvisitedNodes.add(state.getExit());
+   while (unvisitedNodes.size() > 0) {
+     Node node = getMin(unvisitedNodes);
+     visitedNodes.add(node);
+     unvisitedNodes.remove(node);
+     findShortestRoute(node);
+  }
+
+  System.out.println("EXIT: " + state.getExit().getId());
+
+  
 
 /* Breadth first 
     
@@ -227,8 +246,35 @@ public class Explorer {
     //TODO: Escape from the cavern before time runs out
       
   }
+private Node getMin(Set<Node> nodes) {
+  Node min= null;
+  for (Node node : nodes) {
+    if (min == null) {
+      min = node;
+    } else {
+      if (getDistance(node) < getDistance(min)) {
+        min = node;
+      }
+    }
+  }
+  return min;
+ }
 
+private void findShortestRoute(Node node) {
+   Set<Node> neighbours = node.getNeighbours();
+   for (Node neighbour : neighbours) {
+      if (getDistance(neighbour) > (getDistance(node) + 1)) { 
+        distance.put(neighbour, getDistance(node) + 1);
+         System.out.println("Adding "+neighbour.getId()+ ", " + node.getId());
+         prev.put(neighbour, node);
+         unvisitedNodes.add(neighbour);
+      }
+   }
+  }
 
+ private int getDistance(Node destination) {
+  return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
+}
 
 }
 
