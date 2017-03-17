@@ -206,9 +206,29 @@ public class Explorer {
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
         }
+
+         for (Node child : state.getCurrentNode().getNeighbours()) {
+           if(child.getTile().getGold() > 0){
+             state.moveTo(child);
+             state.pickUpGold();
+             state.moveTo(node);
+           }
+         }
+
       }
     }    
+
+    int gold = 0;
+     for (Node node : nodes) {
+       gold += node.getTile().getOriginalGold();   
+      }
+
+      System.out.println("--- Efficiency --- ");
+      System.out.println(">> Total Gold: " + gold);
+      System.out.println(">> Time Remaining: " + state.getTimeRemaining());
   }
+
+
 
 private Node getMin(Set<Node> nodes) {
   Node min= null;
