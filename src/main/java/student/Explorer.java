@@ -212,16 +212,15 @@ public class Explorer {
                state.moveTo(child);
                state.pickUpGold();
                for (Node subChild : state.getCurrentNode().getNeighbours()) {
-                if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2))){
-                  state.moveTo(subChild);
-                  state.pickUpGold();
-                  state.moveTo(child);
+                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(subChild).length()*2))){
+                   state.moveTo(subChild);
+                   state.pickUpGold();
+                   state.moveTo(child);
+                  }
                 }
-                }
-
+                
                state.moveTo(node);
            }
-          
          }
 
       }
