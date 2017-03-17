@@ -195,73 +195,35 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
-   /* Dijkstra implementation */
-   System.out.println("START: " +state.getCurrentNode().getId());
+     /* Dijkstra implementation */
+     nodes = new ArrayList<Node>(state.getVertices());
+     distance.put(state.getExit(), 0);
+     unvisitedNodes.add(state.getExit());
+     while (unvisitedNodes.size() > 0) {
+       Node node = getMin(unvisitedNodes);
+       visitedNodes.add(node);
+       unvisitedNodes.remove(node);
+       findShortestRoute(node);
+    }
 
-   nodes = new ArrayList<Node>(state.getVertices());
-   
-   distance.put(state.getExit(), 0);
-   unvisitedNodes.add(state.getExit());
-   while (unvisitedNodes.size() > 0) {
-     Node node = getMin(unvisitedNodes);
-     visitedNodes.add(node);
-     unvisitedNodes.remove(node);
-     findShortestRoute(node);
-  }
-
-  List<Node> path = new ArrayList();
-  Node step = state.getCurrentNode();
-  path.add(step);
-  while (prev.get(step) != null) {
-    step = prev.get(step);
+    List<Node> path = new ArrayList();
+    Node step = state.getCurrentNode();
     path.add(step);
-  }
+    while (prev.get(step) != null) {
+      step = prev.get(step);
+      path.add(step);
+    }
   
-  for (Node node : path) {
-    if(!(node == state.getCurrentNode())){
-      state.moveTo(node);
-      if(node.getTile().getGold() > 0){
-        state.pickUpGold();
+    for (Node node : path) {
+      if(!(node == state.getCurrentNode())){
+        state.moveTo(node);
+        if(node.getTile().getGold() > 0){
+          state.pickUpGold();
+        }
       }
-    }
+    }    
   }
 
-
-
-
-/* Breadth first 
-    
-    int i = 0;
-    List visited = new ArrayList();
-    Queue queue = new LinkedList();
-    queue.add(state.getCurrentNode());
-    visited.add(state.getCurrentNode());
-    while(!queue.isEmpty()) {
-      Node node = (Node)queue.remove();
-      //state.moveTo(node);
-      for (Node neighbour : node.getNeighbours()) {
-      if(!visited.contains(neighbour)){
-       // state.moveTo(neighbour);
-        visited.add(neighbour);
-       System.out.println("At: " + neighbour.getId());
-       if(neighbour.getId() == state.getExit().getId()){
-         System.out.println("Arrived:");
-         return;
-       }
-        queue.add(neighbour);
-      }
-    }
-    //state.moveTo(node);
-    }
-    */
-
-
-
-    //System.out.println("Distance:" + Math.sqrt(Math.abs((state.getExit().getTile().getRow() - state.getCurrentNode().getTile().getRow())^2 - (state.getExit().getTile().getColumn() - state.getCurrentNode().getTile().getColumn())^2)));
-
-    //TODO: Escape from the cavern before time runs out
-      
-  }
 private Node getMin(Set<Node> nodes) {
   Node min= null;
   for (Node node : nodes) {
@@ -279,8 +241,9 @@ private Node getMin(Set<Node> nodes) {
 private void findShortestRoute(Node node) {
    Set<Node> neighbours = node.getNeighbours();
    for (Node neighbour : neighbours) {
-      if (getDistance(neighbour) > (getDistance(node) + 1)) { 
-        distance.put(neighbour, getDistance(node) + 1);
+
+      if (getDistance(neighbour) > (getDistance(node) + (1/(1 + node.getTile().getGold())))) { 
+         distance.put(neighbour, getDistance(node) + + (1/(1 + node.getTile().getGold())));
          //System.out.println("Adding "+neighbour.getId()+ ", " + node.getId());
          prev.put(neighbour, node);
          unvisitedNodes.add(neighbour);
