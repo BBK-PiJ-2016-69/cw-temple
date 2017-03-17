@@ -7,11 +7,19 @@ import game.NodeStatus;
 import game.Tile;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
 import java.util.TreeMap;
 
 public class Explorer {
+
+
 
   /**
    * Explore the cavern, trying to find the orb in as few steps as possible.
@@ -183,16 +191,44 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
+   
+   
+
+/* Breadth first */
+    
     int i = 0;
     List visited = new ArrayList();
-   
-      for (Node neighbour : state.getCurrentNode().getNeighbours()) {
-        System.out.println(neighbour.getId() + "\n");
-      } 
+    Queue queue = new LinkedList();
+    queue.add(state.getCurrentNode());
+    visited.add(state.getCurrentNode());
+    while(!queue.isEmpty()) {
+      Node node = (Node)queue.remove();
+      state.moveTo(node);
+      for (Node neighbour : node.getNeighbours()) {
+      if(!visited.contains(neighbour)){
+        state.moveTo(neighbour);
+        visited.add(neighbour);
+       System.out.println("At: " + neighbour.getId());
+       if(neighbour.getId() == state.getExit().getId()){
+         System.out.println("Arrived:");
+         return;
+       }
+        queue.add(neighbour);
+      }
+    }
+    state.moveTo(node);
+    }
+    
 
-    System.out.println("Distance:" + Math.sqrt(Math.abs((state.getExit().getTile().getRow() - state.getCurrentNode().getTile().getRow())^2 - (state.getExit().getTile().getColumn() - state.getCurrentNode().getTile().getColumn())^2)));
+
+
+    //System.out.println("Distance:" + Math.sqrt(Math.abs((state.getExit().getTile().getRow() - state.getCurrentNode().getTile().getRow())^2 - (state.getExit().getTile().getColumn() - state.getCurrentNode().getTile().getColumn())^2)));
 
     //TODO: Escape from the cavern before time runs out
       
   }
+
+
+
 }
+
