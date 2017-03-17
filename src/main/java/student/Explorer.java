@@ -206,12 +206,19 @@ public class Explorer {
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
         }
-        // Count how many times for no fail, need function for calculating path weight
 
          for (Node child : state.getCurrentNode().getNeighbours()) {
-              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + child.getEdge(node).length())){
+              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2))){
                state.moveTo(child);
                state.pickUpGold();
+               for (Node subChild : state.getCurrentNode().getNeighbours()) {
+                if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2))){
+                  state.moveTo(subChild);
+                  state.pickUpGold();
+                  state.moveTo(child);
+                }
+                }
+
                state.moveTo(node);
            }
           
