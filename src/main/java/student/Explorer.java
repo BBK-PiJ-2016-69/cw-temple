@@ -194,7 +194,7 @@ public class Explorer {
    
    
 
-/* Breadth first */
+/* Breadth first 
     
     int i = 0;
     List visited = new ArrayList();
@@ -218,7 +218,7 @@ public class Explorer {
     }
     //state.moveTo(node);
     }
-    
+    */
 
 
 
