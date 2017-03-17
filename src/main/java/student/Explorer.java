@@ -209,9 +209,23 @@ public class Explorer {
      findShortestRoute(node);
   }
 
-  System.out.println("EXIT: " + state.getExit().getId());
-
+  List<Node> path = new ArrayList();
+  Node step = state.getCurrentNode();
+  path.add(step);
+  while (prev.get(step) != null) {
+    step = prev.get(step);
+    path.add(step);
+  }
   
+  for (Node node : path) {
+    if(!(node == state.getCurrentNode())){
+      System.out.println("Moving to: " + node.getId());
+      state.moveTo(node);
+    }
+  }
+
+
+
 
 /* Breadth first 
     
@@ -265,7 +279,7 @@ private void findShortestRoute(Node node) {
    for (Node neighbour : neighbours) {
       if (getDistance(neighbour) > (getDistance(node) + 1)) { 
         distance.put(neighbour, getDistance(node) + 1);
-         System.out.println("Adding "+neighbour.getId()+ ", " + node.getId());
+         //System.out.println("Adding "+neighbour.getId()+ ", " + node.getId());
          prev.put(neighbour, node);
          unvisitedNodes.add(neighbour);
       }
