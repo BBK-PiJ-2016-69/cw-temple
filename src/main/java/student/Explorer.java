@@ -2,7 +2,9 @@ package student;
 
 import game.EscapeState;
 import game.ExplorationState;
+import game.Node;
 import game.NodeStatus;
+import game.Tile;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,6 +182,49 @@ public class Explorer {
    * @param state the information available at the current state
    */
   public void escape(EscapeState state) {
+    
+    while(state.getCurrentNode().getId() != state.getExit().getId()){
+
+      // Move to lesser row
+      if(state.getCurrentNode().getTile().getRow() > state.getExit().getTile().getRow()){
+        for (Node node : state.getVertices()) {
+          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() - 1 && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn()){
+            state.moveTo(node);
+          }
+        }
+      } 
+      
+      // Move to greater row
+      if(state.getCurrentNode().getTile().getRow() < state.getExit().getTile().getRow()){
+        for (Node node : state.getVertices()) {
+          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() + 1 && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn()){
+            state.moveTo(node);
+          }
+        }
+      } 
+
+      // Move to lesser col
+      if(state.getCurrentNode().getTile().getColumn() < state.getExit().getTile().getColumn()){
+        for (Node node : state.getVertices()) {
+          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn() - 1){
+            state.moveTo(node);
+          }
+        }
+      } 
+
+      // Move to greater col
+      if(state.getCurrentNode().getTile().getRow() < state.getExit().getTile().getRow()){
+        for (Node node : state.getVertices()) {
+          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn() + 1){
+            state.moveTo(node);
+          }
+        }
+      } 
+    }
+
+    System.out.println("Distance:" + Math.sqrt(Math.abs((state.getExit().getTile().getRow() - state.getCurrentNode().getTile().getRow())^2 - (state.getExit().getTile().getColumn() - state.getCurrentNode().getTile().getColumn())^2)));
+
     //TODO: Escape from the cavern before time runs out
+      
   }
 }
