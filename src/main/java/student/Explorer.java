@@ -203,10 +203,10 @@ public class Explorer {
     visited.add(state.getCurrentNode());
     while(!queue.isEmpty()) {
       Node node = (Node)queue.remove();
-      state.moveTo(node);
+      //state.moveTo(node);
       for (Node neighbour : node.getNeighbours()) {
       if(!visited.contains(neighbour)){
-        state.moveTo(neighbour);
+       // state.moveTo(neighbour);
         visited.add(neighbour);
        System.out.println("At: " + neighbour.getId());
        if(neighbour.getId() == state.getExit().getId()){
@@ -216,7 +216,7 @@ public class Explorer {
         queue.add(neighbour);
       }
     }
-    state.moveTo(node);
+    //state.moveTo(node);
     }
     
 
