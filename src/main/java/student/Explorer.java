@@ -183,44 +183,12 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
-    while(state.getCurrentNode().getId() != state.getExit().getId()){
-
-      // Move to lesser row
-      if(state.getCurrentNode().getTile().getRow() > state.getExit().getTile().getRow()){
-        for (Node node : state.getVertices()) {
-          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() - 1 && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn()){
-            state.moveTo(node);
-          }
-        }
+    int i = 0;
+    List visited = new ArrayList();
+   
+      for (Node neighbour : state.getCurrentNode().getNeighbours()) {
+        System.out.println(neighbour.getId() + "\n");
       } 
-      
-      // Move to greater row
-      if(state.getCurrentNode().getTile().getRow() < state.getExit().getTile().getRow()){
-        for (Node node : state.getVertices()) {
-          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() + 1 && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn()){
-            state.moveTo(node);
-          }
-        }
-      } 
-
-      // Move to lesser col
-      if(state.getCurrentNode().getTile().getColumn() < state.getExit().getTile().getColumn()){
-        for (Node node : state.getVertices()) {
-          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn() - 1){
-            state.moveTo(node);
-          }
-        }
-      } 
-
-      // Move to greater col
-      if(state.getCurrentNode().getTile().getRow() < state.getExit().getTile().getRow()){
-        for (Node node : state.getVertices()) {
-          if(node.getTile().getRow() == state.getCurrentNode().getTile().getRow() && node.getTile().getColumn() == state.getCurrentNode().getTile().getColumn() + 1){
-            state.moveTo(node);
-          }
-        }
-      } 
-    }
 
     System.out.println("Distance:" + Math.sqrt(Math.abs((state.getExit().getTile().getRow() - state.getCurrentNode().getTile().getRow())^2 - (state.getExit().getTile().getColumn() - state.getCurrentNode().getTile().getColumn())^2)));
 
