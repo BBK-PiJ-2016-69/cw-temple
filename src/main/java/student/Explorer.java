@@ -181,6 +181,8 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
+    int startTime = state.getTimeRemaining();
+
      /* Dijkstra implementation */
      nodes = new ArrayList<Node>(state.getVertices());
      distance.put(state.getExit(), 0);
@@ -207,12 +209,15 @@ public class Explorer {
           state.pickUpGold();
         }
 
+        // TO DO: Calculate which nodes have the most gold and optimise to visit these? Optimise edge length vs gold ratio?
+        // ADD running of multiple paths to see which gives the best result?
+
          for (Node child : state.getCurrentNode().getNeighbours()) {
-              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2))){
+              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2)) && !path.contains(child)){
                state.moveTo(child);
                state.pickUpGold();
                for (Node subChild : state.getCurrentNode().getNeighbours()) {
-                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(subChild).length()*2))){
+                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(subChild).length()*2)) && !path.contains(subChild)){
                    state.moveTo(subChild);
                    state.pickUpGold();
                    state.moveTo(child);
@@ -233,6 +238,7 @@ public class Explorer {
 
       System.out.println("--- Efficiency --- ");
       System.out.println(">> Total Gold: " + gold);
+      System.out.println(">> Initial Time: " + startTime);
       System.out.println(">> Time Remaining: " + state.getTimeRemaining());
   }
 
@@ -281,7 +287,6 @@ private void findShortestRoute(Node node) {
       }
       
     }
-
     if(node == currentNode){
       countNode = true;
     }
