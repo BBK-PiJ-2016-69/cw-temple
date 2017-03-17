@@ -219,8 +219,10 @@ public class Explorer {
   
   for (Node node : path) {
     if(!(node == state.getCurrentNode())){
-      System.out.println("Moving to: " + node.getId());
       state.moveTo(node);
+      if(node.getTile().getGold() > 0){
+        state.pickUpGold();
+      }
     }
   }
 
