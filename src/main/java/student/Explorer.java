@@ -151,8 +151,10 @@ public class Explorer {
 
     
   }
+  /*
   System.out.println(" -- Moves: " + i + " ---");
   System.out.println(" -- Max: " + max + " ---");
+  */
   }
 
   /**
@@ -212,14 +214,14 @@ public class Explorer {
     }
 
     int capacity = startTime - lengthRemaining(state.getCurrentNode());
-    System.out.println("Spare length: " + capacity);
 
     List<Node> goldPath = new ArrayList();
     Node goldStep = state.getCurrentNode();
     boolean reachedLimit = false;
     goldPath.add(goldStep);
     Node maxGold = null;
-    while(!reachedLimit){
+    int i = 0;
+    while(!reachedLimit && i < 1000){
     for (Node goldSteps : goldStep.getNeighbours()){
       if(!path.contains(goldSteps) && !goldPath.contains(goldSteps)){
         if(maxGold == null){
@@ -234,7 +236,6 @@ public class Explorer {
     if(capacity > maxGold.getEdge(goldStep).length()*2){
       capacity -= maxGold.getEdge(goldStep).length()*2;
       goldPath.add(maxGold);
-      System.out.println("Here");
     }
     else
     {
@@ -243,11 +244,11 @@ public class Explorer {
     goldStep = maxGold;
     maxGold = null;
   }
+  i++;
   }
 
   for (Node node : goldPath) {
       if(!(node == state.getCurrentNode())){
-        System.out.println("Moving down gold path");
         state.moveTo(node);
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
@@ -255,11 +256,12 @@ public class Explorer {
       }
   }
 
+  // TO DO: Instead of reversing, see if you can loop around in a complete circle or join path elsewhere to avoid doubling up?
+
   Collections.reverse(goldPath);
 
   for (Node node : goldPath) {
       if(!(node == state.getCurrentNode())){
-        System.out.println("Moving back down gold path");
         state.moveTo(node);
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
@@ -302,10 +304,10 @@ public class Explorer {
        gold += node.getTile().getOriginalGold();   
       }
 
-      System.out.println("--- Efficiency --- ");
+      /* System.out.println("--- Efficiency --- ");
       System.out.println(">> Total Gold: " + gold);
       System.out.println(">> Initial Time: " + startTime);
-      System.out.println(">> Time Remaining: " + state.getTimeRemaining());
+      System.out.println(">> Time Remaining: " + state.getTimeRemaining()); */
 
    }
 
