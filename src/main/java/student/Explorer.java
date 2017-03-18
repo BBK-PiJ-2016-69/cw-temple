@@ -215,11 +215,13 @@ public class Explorer {
     System.out.println("Spare length: " + capacity);
 
     List<Node> goldPath = new ArrayList();
-    Node goldStep = goldPath.add(state.getCurrentNode());
+    Node goldStep = state.getCurrentNode();
+    boolean reachedLimit = false;
+    goldPath.add(goldStep);
     Node maxGold = null;
-    while(capacity > 0){
+    while(!reachedLimit){
     for (Node goldSteps : goldStep.getNeighbours()){
-      if(!path.contains(goldSteps)){
+      if(!path.contains(goldSteps) && !goldPath.contains(goldSteps)){
         if(maxGold == null){
           maxGold = goldSteps;
         }
@@ -228,15 +230,24 @@ public class Explorer {
         }
       }
     }
-    if(capacity > maxGold.getEdge(state.getCurrentNode())*2){
-      capaciy -= maxGold.getEdge(state.getCurrentNode())*2;
+    if(maxGold != null) {
+    if(capacity > maxGold.getEdge(goldStep).length()*2){
+      capacity -= maxGold.getEdge(goldStep).length()*2;
       goldPath.add(maxGold);
+      System.out.println("Here");
     }
+    else
+    {
+      reachedLimit = true;
+    }
+    goldStep = maxGold;
     maxGold = null;
+  }
   }
 
   for (Node node : goldPath) {
       if(!(node == state.getCurrentNode())){
+        System.out.println("Moving down gold path");
         state.moveTo(node);
         if(node.getTile().getGold() > 0){
           state.pickUpGold();
@@ -244,7 +255,19 @@ public class Explorer {
       }
   }
 
-  goldPath = Collections.reverse(goldPath);
+  Collections.reverse(goldPath);
+
+  for (Node node : goldPath) {
+      if(!(node == state.getCurrentNode())){
+        System.out.println("Moving back down gold path");
+        state.moveTo(node);
+        if(node.getTile().getGold() > 0){
+          state.pickUpGold();
+        }
+      }
+  }
+
+
 
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
