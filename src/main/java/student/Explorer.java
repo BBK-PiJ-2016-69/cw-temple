@@ -55,7 +55,7 @@ public class Explorer {
    *
    * @param state the information available at the current state
    */
-  public void explore(ExplorationState state) {
+ public void explore(ExplorationState state) {
 
   //  System.out.println("My Location: "+state.getCurrentLocation());
  //   System.out.println("Distance to Target: "+state.getDistanceToTarget());
@@ -183,7 +183,7 @@ public class Explorer {
     
     int startTime = state.getTimeRemaining();
 
-     /* Dijkstra implementation */
+     /* Dijkstra implementation  */
      nodes = new ArrayList<Node>(state.getVertices());
      distance.put(state.getExit(), 0);
      unvisitedNodes.add(state.getExit());
@@ -201,7 +201,19 @@ public class Explorer {
       step = prev.get(step);
       path.add(step);
     }
-  
+
+    /*
+    Node maxGold = null;
+     for(Node goldNode : nodes){
+        if(maxGold == null || goldNode.getTile().getGold() > maxGold.getTile().getGold()){
+            maxGold = goldNode;
+          }
+        }
+        System.out.println("Max Gold: " + maxGold.getTile().getGold());
+  */
+
+
+
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
         state.moveTo(node);
@@ -211,15 +223,24 @@ public class Explorer {
 
         // TO DO: Calculate which nodes have the most gold and optimise to visit these? Optimise edge length vs gold ratio?
         // ADD running of multiple paths to see which gives the best result?
+        // Search for all gold within range and calculate route?
+        // Calculate gold within X squares of grid path, weight by distance from path (in Length()) and visit in order after optimising for time available
+        // Calc all paths below TimeRemaining()?
+        // BFS for any path under TimeRemaining() ordered by gold on route?
 
+        // Walk to highest gold (or second, or third) then return to nearest point on path
+
+
+        // DO BELOW VIA RECURSIVE CALL AFTER TESTING
          for (Node child : state.getCurrentNode().getNeighbours()) {
               if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2)) && !path.contains(child)){
                state.moveTo(child);
                state.pickUpGold();
+               
                for (Node subChild : state.getCurrentNode().getNeighbours()) {
-                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(subChild).length()*2)) && !path.contains(subChild)){
+                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(path, node) + (child.getEdge(node).length()*2) + (child.getEdge(subChild).length()*2)) && !path.contains(subChild)){
                    state.moveTo(subChild);
-                   state.pickUpGold();
+                   state.pickUpGold();     
                    state.moveTo(child);
                   }
                 }
@@ -240,7 +261,8 @@ public class Explorer {
       System.out.println(">> Total Gold: " + gold);
       System.out.println(">> Initial Time: " + startTime);
       System.out.println(">> Time Remaining: " + state.getTimeRemaining());
-  }
+
+   }
 
 
 
@@ -262,9 +284,9 @@ private void findShortestRoute(Node node) {
    Set<Node> neighbours = node.getNeighbours();
    for (Node neighbour : neighbours) {
 
-      if (getDistance(neighbour) > (getDistance(node) + (1/(1 + node.getTile().getGold())))) { 
-         distance.put(neighbour, getDistance(node) + + (1/(1 + node.getTile().getGold())));
-         //System.out.println("Adding "+neighbour.getId()+ ", " + node.getId());
+      //System.out.println(node.getTile().getGold());
+      if (getDistance(neighbour) > (getDistance(node) + (3000 - node.getTile().getGold()))) { 
+         distance.put(neighbour, getDistance(node) + (3000 - node.getTile().getGold()));
          prev.put(neighbour, node);
          unvisitedNodes.add(neighbour);
       }
