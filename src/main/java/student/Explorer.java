@@ -59,18 +59,17 @@ public class Explorer {
 
    boolean moved;
    int max = 0;
-   List<Long> visited = new ArrayList<Long>();
    Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
    NodeStatus min = null;
    NodeStatus toVisit = null;
 
    // Enter main loop (until destination is found)
    while(state.getDistanceToTarget() > 0){
-    moved = false;
+   moved = false;
 
     // Check all neighbours to find an unvisisted node that is closer to the target
     for (NodeStatus neighbour : state.getNeighbours()) {
-      if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
+      if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && visitedTimes.get(neighbour.getId()) == null){
         moved = true;
         toVisit = neighbour;
         break;
@@ -80,7 +79,7 @@ public class Explorer {
     // Check all neighbours to find an unvisisted node that is the same distance to the target
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
-        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
+        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && visitedTimes.get(neighbour.getId()) == null){
           moved = true;
           toVisit = neighbour;
           break;
@@ -91,7 +90,7 @@ public class Explorer {
   	// Check all neighbours to find an unvisited node
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
-       if(!visited.contains(neighbour.getId())){
+       if(visitedTimes.get(neighbour.getId()) == null){
         moved = true;
         toVisit = neighbour;
         break;
@@ -102,18 +101,16 @@ public class Explorer {
   // Check all neighbours to find the least visited node
   if(!moved) { 
     for (NodeStatus neighbour : state.getNeighbours()) {
-      if(min == null){ min = neighbour; }
-        if (visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
-          min = neighbour;
-        }
+      if (min == null || visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
+        min = neighbour;
       }
+    }
       moved = true;
       toVisit = min;
       min = null;
     }
 
    // Move to selected node
-   visited.add(toVisit.getId());
    visitedTimes.put(toVisit.getId(),visitedTimes.get(toVisit.getId()) == null ? 1 : visitedTimes.get(toVisit.getId()) + 1);
    state.moveTo(toVisit.getId()); 
   }
@@ -201,9 +198,9 @@ public class Explorer {
 
   // Calculates new route to the exit
 	path = dijkstra(state);
-
 	capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode());
 
+   // Follows path
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
         state.moveTo(node);
@@ -211,6 +208,8 @@ public class Explorer {
           state.pickUpGold();
         }
 
+        // DO THIS TO PICK UP MOST GOLD, NOT JUST ANY
+        // Explores around the target path if there is enough capacity and there is gold to be gathered
          for (Node child : state.getCurrentNode().getNeighbours()) {
               if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length()*2)) && !path.contains(child)){
                state.moveTo(child);
@@ -229,84 +228,83 @@ public class Explorer {
     }    
    }
 
-/**
- * Gets the closest node as measured by the getDistance method.
- *
- * @param nodes A set of nodes from which the closest is selected.
- * @return min The closest node
- */
-private Node getMin(Set<Node> nodes) {
-  Node min= null;
-  for (Node node : nodes) {
-    if (min == null) {
-      min = node;
-    } else {
-      if (getDistance(node) < getDistance(min)) {
+  /**
+   * Gets the closest node as measured by the getDistance method.
+   *
+   * @param nodes A set of nodes from which the closest is selected.
+   * @return min The closest node
+   */
+  private Node getMin(Set<Node> nodes) {
+    Node min= null;
+    for (Node node : nodes) {
+      if (min == null) {
         min = node;
+      } else {
+        if (getDistance(node) < getDistance(min)) {
+          min = node;
+        }
+      }
+    }
+    return min;
+   }
+
+  /**
+   * Finds the closest neighbour node to a given node and adds the path
+   * to the List.
+   *
+   * @param node A node for which to find the nearest neighbour
+   */
+  private void findShortestRoute(Node node) {
+    Set<Node> neighbours = node.getNeighbours();
+    for (Node neighbour : neighbours) {
+      if (getDistance(neighbour) > (getDistance(node))) { 
+        distance.put(neighbour, getDistance(node));
+        prev.put(neighbour, node);
+        unvisitedNodes.add(neighbour);
       }
     }
   }
-  return min;
- }
 
-/**
- * Finds the closest neighbour node to a given node and adds the path
- * to the List.
- *
- * @param node A node for which to find the nearest neighbour
- */
-private void findShortestRoute(Node node) {
-   Set<Node> neighbours = node.getNeighbours();
-   for (Node neighbour : neighbours) {
-      if (getDistance(neighbour) > (getDistance(node))) { 
-         distance.put(neighbour, getDistance(node));
-         prev.put(neighbour, node);
-         unvisitedNodes.add(neighbour);
-      }
-   }
+  /**
+   * Gets distance from list where calculated or returns a maximum value
+   *
+   * @param destination A node for which to check the distance.
+   * @return The distance or a maximum integer value where not found.
+   */
+  private int getDistance(Node destination) {
+    return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
   }
 
-/**
- * Gets distance from list where calculated or returns a maximum value
- *
- * @param destination A node for which to check the distance.
- * @return The distance or a maximum integer value where not found.
- */
- private int getDistance(Node destination) {
-  return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
-}
-
-/**
- * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
- *
- * @param currentNode The length of the path from this node to the exit will be returned.
- * @return length The length of the path from the given node to the exit.
- */
- private int lengthRemaining(Node currentNode) {
-  int length = 0;
-
-  while (prev.get(currentNode) != null) {
+  /**
+   * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+   *
+   * @param currentNode The length of the path from this node to the exit will be returned.
+   * @return length The length of the path from the given node to the exit.
+   */
+  private int lengthRemaining(Node currentNode) {
+    int length = 0;
+    while (prev.get(currentNode) != null) {
       length += currentNode.getEdge(prev.get(currentNode)).length();
       currentNode = prev.get(currentNode);
     }
-  return length;
- }
+    return length;
+   }
 
- /**
- * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
- *
- * @param state the EscapeState to allow the method to calculate relevant locations
- * @return path a List of nodes providing a path to the exit
- */
- private List<Node> dijkstra(EscapeState state){
- 	nodes = new ArrayList<Node>(state.getVertices());
-     distance.put(state.getExit(), 0);
-     unvisitedNodes.add(state.getExit());
-     while (unvisitedNodes.size() > 0) {
-       Node node = getMin(unvisitedNodes);
-       visitedNodes.add(node);
-       unvisitedNodes.remove(node);
-       findShortestRoute(node);
+   /**
+   * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+   *
+   * @param state the EscapeState to allow the method to calculate relevant locations
+   * @return path a List of nodes providing a path to the exit
+   */
+  private List<Node> dijkstra(EscapeState state){
+    nodes = new ArrayList<Node>(state.getVertices());
+    distance.put(state.getExit(), 0);
+    unvisitedNodes.add(state.getExit());
+    while (unvisitedNodes.size() > 0) {
+      Node node = getMin(unvisitedNodes);
+      visitedNodes.add(node);
+      unvisitedNodes.remove(node);
+      findShortestRoute(node);
     }
 
     List<Node> path = new ArrayList<Node>();
@@ -317,6 +315,6 @@ private void findShortestRoute(Node node) {
       path.add(step);
     }
     return path;
- }
+  }
 }
 
