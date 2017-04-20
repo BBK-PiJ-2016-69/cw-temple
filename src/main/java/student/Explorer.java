@@ -202,7 +202,7 @@ public class Explorer {
         }
 
         // Explores around the target path if there is enough capacity and there is gold to be gathered
-        stray(state);
+        stray(state, path, node);
         
       }
     }    
@@ -308,15 +308,18 @@ public class Explorer {
   /**
    * Recursive function to stray from the path in search of gold.
    *
-   * @param status The current status of the game.
+   * @param state The current state of the game.
+   * @param path A list of nodes on the route to the exit.
+   * @param node The current node on which the character stands.
    */
-  private void stray(EscapeState state) {
+  private void stray(EscapeState state, List path, Node node) {
     for (Node child : state.getCurrentNode().getNeighbours()) {
       if (child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length() * 2)) && !path.contains(child)) {
         state.moveTo(child);
         state.pickUpGold();  
-        stray(state);
+        stray(state, path, child);
+        state.moveTo(node);
       }
     }
   }
-}
+}	
