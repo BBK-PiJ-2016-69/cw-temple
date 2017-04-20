@@ -23,7 +23,7 @@ public class Explorer {
   private Set<Node> unvisitedNodes = new HashSet<Node>();
   private Map<Node, Integer> distance = new HashMap<Node, Integer>();
   private Map<Node, Node> prev = new HashMap<Node, Node>();
-  private List<Node> nodes = null;
+  private Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
 
   /**
    * Explore the cavern, trying to find the orb in as few steps as possible.
@@ -55,65 +55,64 @@ public class Explorer {
    *
    * @param state the information available at the current state
    */
- public void explore(ExplorationState state) {
+  public void explore(ExplorationState state) {
 
-   boolean moved;
-   int max = 0;
-   Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
-   NodeStatus min = null;
-   NodeStatus toVisit = null;
+    boolean moved;
+    int max = 0;
+    NodeStatus min = null;
+    NodeStatus toVisit = null;
 
-   // Enter main loop (until destination is found)
-   while(state.getDistanceToTarget() > 0){
-   moved = false;
+    // Enter main loop (until destination is found)
+    while (state.getDistanceToTarget() > 0) {
+      moved = false;
 
-    // Check all neighbours to find an unvisisted node that is closer to the target
-    for (NodeStatus neighbour : state.getNeighbours()) {
-      if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && visitedTimes.get(neighbour.getId()) == null){
-        moved = true;
-        toVisit = neighbour;
-        break;
-      }
-    }
-
-    // Check all neighbours to find an unvisisted node that is the same distance to the target
-    if(!moved) { 
+      // Check all neighbours to find an unvisisted node that is closer to the target
       for (NodeStatus neighbour : state.getNeighbours()) {
-        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && visitedTimes.get(neighbour.getId()) == null){
+        if (neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited(neighbour)) {
           moved = true;
           toVisit = neighbour;
           break;
         }
       }
-    }
 
-  	// Check all neighbours to find an unvisited node
-    if(!moved) { 
-      for (NodeStatus neighbour : state.getNeighbours()) {
-       if(visitedTimes.get(neighbour.getId()) == null){
+      // Check all neighbours to find an unvisisted node that is the same distance to the target
+      if (!moved) { 
+        for (NodeStatus neighbour : state.getNeighbours()) {
+          if (neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited(neighbour)) {
+            moved = true;
+            toVisit = neighbour;
+            break;
+          }
+        }
+      }
+
+      // Check all neighbours to find an unvisited node
+      if (!moved) { 
+        for (NodeStatus neighbour : state.getNeighbours()) {
+          if (!visited(neighbour)) {
+            moved = true;
+            toVisit = neighbour;
+            break;
+          }
+        }
+      }
+
+      // Check all neighbours to find the least visited node
+      if (!moved) { 
+        for (NodeStatus neighbour : state.getNeighbours()) {
+          if (min == null || visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())) {
+            min = neighbour;
+          }
+        }
         moved = true;
-        toVisit = neighbour;
-        break;
+        toVisit = min;
+        min = null;
       }
-    }
-  }
 
-  // Check all neighbours to find the least visited node
-  if(!moved) { 
-    for (NodeStatus neighbour : state.getNeighbours()) {
-      if (min == null || visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
-        min = neighbour;
-      }
+      // Move to selected node
+      visitedTimes.put(toVisit.getId(),!visited(toVisit) ? 1 : visitedTimes.get(toVisit.getId()) + 1);
+      state.moveTo(toVisit.getId()); 
     }
-      moved = true;
-      toVisit = min;
-      min = null;
-    }
-
-   // Move to selected node
-   visitedTimes.put(toVisit.getId(),visitedTimes.get(toVisit.getId()) == null ? 1 : visitedTimes.get(toVisit.getId()) + 1);
-   state.moveTo(toVisit.getId()); 
-  }
   }
 
   /**
@@ -155,78 +154,59 @@ public class Explorer {
     goldPath.add(goldStep);
     Node maxGold = null;
     int i = 0;
-    while(!reachedLimit && i < 1000){
-    for (Node goldSteps : goldStep.getNeighbours()){
-      if(!path.contains(goldSteps) && !goldPath.contains(goldSteps)){
-        if(maxGold == null){
-          maxGold = goldSteps;
-        }
-        if(maxGold.getTile().getGold() < goldSteps.getTile().getGold()){
-          maxGold = goldSteps;
+    while (!reachedLimit && i < 1000) {
+      for (Node goldSteps : goldStep.getNeighbours()) {
+        if (!path.contains(goldSteps) && !goldPath.contains(goldSteps)) {
+          if (maxGold == null || maxGold.getTile().getGold() < goldSteps.getTile().getGold()) {
+            maxGold = goldSteps;
+          }
         }
       }
-    }
-    if(maxGold != null) {
-    if(capacity > maxGold.getEdge(goldStep).length()*2){
-      capacity -= maxGold.getEdge(goldStep).length()*2;
-      goldPath.add(maxGold);
-    }
-    else
-    {
-      reachedLimit = true;
-    }
-    goldStep = maxGold;
-    maxGold = null;
-  }
-  i++;
-  }
+      if (maxGold != null) {
+        if (capacity > maxGold.getEdge(goldStep).length() * 2) {
+          capacity -= maxGold.getEdge(goldStep).length() * 2;
+          goldPath.add(maxGold);
+        } else {
+          reachedLimit = true;
+        }
 
-  if(state.getCurrentNode().getTile().getGold() > 0){
-       state.pickUpGold();
-     }
+        goldStep = maxGold;
+        maxGold = null;
+      }
+      i++;
+    }
 
-  // Follow the path to find the gold 
-  for (Node node : goldPath) {
-      if(!(node == state.getCurrentNode())){
+    if (state.getCurrentNode().getTile().getGold() > 0) {
+      state.pickUpGold();
+    }
+
+    // Follow the path to find the gold 
+    for (Node node : goldPath) {
+      if (!(node == state.getCurrentNode())) {
         state.moveTo(node);
-        if(state.getCurrentNode().getTile().getGold() > 0){
-         state.pickUpGold();
+        if (state.getCurrentNode().getTile().getGold() > 0) {
+          state.pickUpGold();
         }
       }
-  }
+    }
 
+    // Calculates new route to the exit
+    path = dijkstra(state);
 
-  // Calculates new route to the exit
-	path = dijkstra(state);
-	capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode());
-
-   // Follows path
+    // Follows path
     for (Node node : path) {
-      if(!(node == state.getCurrentNode())){
+      if (!(node == state.getCurrentNode())) {
         state.moveTo(node);
-        if(node.getTile().getGold() > 0){
+        if (node.getTile().getGold() > 0) {
           state.pickUpGold();
         }
 
-        // DO THIS TO PICK UP MOST GOLD, NOT JUST ANY
         // Explores around the target path if there is enough capacity and there is gold to be gathered
-         for (Node child : state.getCurrentNode().getNeighbours()) {
-              if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length()*2)) && !path.contains(child)){
-               state.moveTo(child);
-               state.pickUpGold();  
-               for (Node subChild : state.getCurrentNode().getNeighbours()) {
-                 if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length()*2) + (child.getEdge(subChild).length()*2)) && !path.contains(subChild)){
-                   state.moveTo(subChild);
-                   state.pickUpGold();     
-                   state.moveTo(child);
-                  }
-                }
-               state.moveTo(node);
-           }
-         }
-       }
+        stray(state);
+        
+      }
     }    
-   }
+  }
 
   /**
    * Gets the closest node as measured by the getDistance method.
@@ -235,18 +215,14 @@ public class Explorer {
    * @return min The closest node
    */
   private Node getMin(Set<Node> nodes) {
-    Node min= null;
+    Node min = null;
     for (Node node : nodes) {
-      if (min == null) {
+      if (min == null || getDistance(node) < getDistance(min)) {
         min = node;
-      } else {
-        if (getDistance(node) < getDistance(min)) {
-          min = node;
-        }
       }
     }
     return min;
-   }
+  }
 
   /**
    * Finds the closest neighbour node to a given node and adds the path
@@ -266,7 +242,7 @@ public class Explorer {
   }
 
   /**
-   * Gets distance from list where calculated or returns a maximum value
+   * Gets distance from list where calculated or returns a maximum value.
    *
    * @param destination A node for which to check the distance.
    * @return The distance or a maximum integer value where not found.
@@ -276,7 +252,7 @@ public class Explorer {
   }
 
   /**
-   * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+   * Gets the length of the remainder of the path to the door via Dijkstra's algorithm.
    *
    * @param currentNode The length of the path from this node to the exit will be returned.
    * @return length The length of the path from the given node to the exit.
@@ -288,18 +264,19 @@ public class Explorer {
       currentNode = prev.get(currentNode);
     }
     return length;
-   }
+  }
 
-   /**
-   * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+  /**
+   * Calculates and returns the path to the exit using Dijkstra's algorithm.
    *
    * @param state the EscapeState to allow the method to calculate relevant locations
    * @return path a List of nodes providing a path to the exit
    */
-  private List<Node> dijkstra(EscapeState state){
-    nodes = new ArrayList<Node>(state.getVertices());
+  private List<Node> dijkstra(EscapeState state) {
     distance.put(state.getExit(), 0);
     unvisitedNodes.add(state.getExit());
+
+    // Calculate route
     while (unvisitedNodes.size() > 0) {
       Node node = getMin(unvisitedNodes);
       visitedNodes.add(node);
@@ -307,6 +284,7 @@ public class Explorer {
       findShortestRoute(node);
     }
 
+    // Add route to path and return
     List<Node> path = new ArrayList<Node>();
     Node step = state.getCurrentNode();
     path.add(step);
@@ -316,5 +294,29 @@ public class Explorer {
     }
     return path;
   }
-}
 
+  /**
+   * Returns true if the node has been visited during the search phase.
+   *
+   * @param node The node to check for visiting status.
+   * @return true if the node has been visited.
+   */
+  private boolean visited(NodeStatus node) {
+    return visitedTimes.get(node.getId()) != null;
+  }
+
+  /**
+   * Recursive function to stray from the path in search of gold.
+   *
+   * @param status The current status of the game.
+   */
+  private void stray(EscapeState state) {
+    for (Node child : state.getCurrentNode().getNeighbours()) {
+      if (child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length() * 2)) && !path.contains(child)) {
+        state.moveTo(child);
+        state.pickUpGold();  
+        stray(state);
+      }
+    }
+  }
+}
