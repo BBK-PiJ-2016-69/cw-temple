@@ -51,7 +51,7 @@ public class ExplorerSprite extends JPanel {
   //Number of animation frames displayed per second
   private static final double ANIMATION_FPS = 10;    
   //Location of the spritesheet image
-  private static final String SPRITESHEET = ROOT + "explorer_sprites.png";    
+  private static final String SPRITESHEET =  "explorer_sprites.png";    
 
   /**
    * Constructor:  an instance with player;'s starting position (startRow, startCol).

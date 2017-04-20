@@ -21,7 +21,7 @@ import javax.swing.JSlider;
 
 public class OptionsPanel extends JPanel implements ActionListener {
   //Location of background image
-  private static final String BACKGROUND_PATH = ROOT + "info_texture.png";  
+  private static final String BACKGROUND_PATH = "info_texture.png";  
   //The minimum speed for the game (seconds per move)          
   private static double MIN_SPEED = 0.05;   
   //The maximum speed for the game (seconds per move)     

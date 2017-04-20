@@ -47,7 +47,7 @@ public class TileSelectPanel extends JPanel {
   //Background for options pane
   private BufferedImage background;        
   //Location of background image
-  private static final String BACKGROUND_PATH = ROOT + "info_texture.png";            
+  private static final String BACKGROUND_PATH = "info_texture.png";            
   //Tells user how to use this panel
   private JLabel instructions;            
   //Information about the larger GUI

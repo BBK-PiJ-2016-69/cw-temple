@@ -26,17 +26,18 @@ public class MazePanel extends JPanel {
   private static final long serialVersionUID = 1L;
 
   //Path to orb image
-  private static final String ORB_PATH = ROOT + "orb.png";   
+  //private static final String ORB_PATH = ROOT + "orb.png";  
+  private static final String ORB_PATH = "orb.png";  
   //Path to image representing path        
-  private static final String PATH_PATH = ROOT + "path.png";         
+  private static final String PATH_PATH = "path.png";         
   //Path to wall image
-  private static final String WALL_PATH = ROOT + "wall.png";  
+  private static final String WALL_PATH = "wall.png";  
   //Path to the coin image
-  private static final String COIN_PATH = ROOT + "coins.png";        
+  private static final String COIN_PATH = "coins.png";        
   //Path to the entrance image
-  private static final String ENTRANCE_PATH = ROOT + "entrance.png"; 
-  private static final String TASTY_PATH = ROOT + "notes.txt";
-  private static final String BACKGROUND_PATH = ROOT + "info_texture.png";
+  private static final String ENTRANCE_PATH = "entrance.png"; 
+  private static final String TASTY_PATH = "notes.txt";
+  private static final String BACKGROUND_PATH =  "info_texture.png";
   //How dark should dark path be? Lower values means darker
   private static final float DARK_FACTOR = 0.3f; 
   private static final int COIN_SPRITES_PER_ROW = 7;
@@ -87,14 +88,15 @@ public class MazePanel extends JPanel {
 
     //Load content
     try {
+
+       wall = ImageIO.read(new File(ClassLoader.getSystemClassLoader()
+          .getResource(WALL_PATH).toURI()));
+
       path = ImageIO.read(new File(ClassLoader.getSystemClassLoader()
           .getResource(PATH_PATH).toURI()));
       
-      wall = ImageIO.read(new File(ClassLoader.getSystemClassLoader()
-          .getResource(WALL_PATH).toURI()));
-      
       orb = ImageIO.read(new File(ClassLoader.getSystemClassLoader()
-          .getResource(ORB_PATH).toURI()));
+          .getResource(ORB_PATH).toURI())); 
 
       coinSheet = new Sprite(COIN_PATH, 32, 32, 1);
       entrance = ImageIO.read(new File(ClassLoader.getSystemClassLoader()

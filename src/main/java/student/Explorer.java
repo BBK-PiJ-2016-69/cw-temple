@@ -56,25 +56,19 @@ public class Explorer {
    * @param state the information available at the current state
    */
  public void explore(ExplorationState state) {
-
-  //  System.out.println("My Location: "+state.getCurrentLocation());
- //   System.out.println("Distance to Target: "+state.getDistanceToTarget());
     
     List visited = new ArrayList();
     List toVisit = new ArrayList();
 
-    int i = 0;
     int max = 0;
     NodeStatus min = null;
     Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
     boolean moved;
-    while(state.getDistanceToTarget() > 0 && i < 100000){
+    for(int i=0; state.getDistanceToTarget() > 0 && i < 100000; i++){
       moved = false;
       i++;
-
-    
-    for (NodeStatus neighbour : state.getNeighbours()) {
-      if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
+      for (NodeStatus neighbour : state.getNeighbours()) {
+       if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
         moved = true;
         visited.add(neighbour.getId());
         if(visitedTimes.get(neighbour.getId()) == null){
@@ -84,8 +78,8 @@ public class Explorer {
         {
           visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
         }
-          state.moveTo(neighbour.getId());
-        
+        state.moveTo(neighbour.getId());
+       
         break;
       }
     }
@@ -128,7 +122,6 @@ public class Explorer {
   }
 
   if(!moved) { 
-
       for (NodeStatus neighbour : state.getNeighbours()) {
         if(min == null){ min = neighbour; }
         if (visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
@@ -151,10 +144,6 @@ public class Explorer {
 
     
   }
-  /*
-  System.out.println(" -- Moves: " + i + " ---");
-  System.out.println(" -- Max: " + max + " ---");
-  */
   }
 
   /**
@@ -183,15 +172,6 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
-
-        // TO DO: Calculate which nodes have the most gold and optimise to visit these? Optimise edge length vs gold ratio?
-        // ADD running of multiple paths to see which gives the best result?
-        // Search for all gold within range and calculate route?
-        // Calculate gold within X squares of grid path, weight by distance from path (in Length()) and visit in order after optimising for time available
-        // Calc all paths below TimeRemaining()?
-        // BFS for any path under TimeRemaining() ordered by gold on route?
-        // Walk to highest gold (or second, or third) then return to nearest point on path
-
     int startTime = state.getTimeRemaining();
 
      /* Dijkstra implementation  */
@@ -216,6 +196,7 @@ public class Explorer {
     int capacity = startTime - lengthRemaining(state.getCurrentNode());
 
     List<Node> goldPath = new ArrayList();
+
     Node goldStep = state.getCurrentNode();
     boolean reachedLimit = false;
     goldPath.add(goldStep);
@@ -256,8 +237,6 @@ public class Explorer {
       }
   }
 
-  // TO DO: Instead of reversing, see if you can loop around in a complete circle or join path elsewhere to avoid doubling up?
-
   Collections.reverse(goldPath);
 
   for (Node node : goldPath) {
@@ -269,8 +248,6 @@ public class Explorer {
       }
   }
 
-
-
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
         state.moveTo(node);
@@ -278,12 +255,10 @@ public class Explorer {
           state.pickUpGold();
         }
 
-        // DO BELOW VIA RECURSIVE CALL AFTER TESTING
          for (Node child : state.getCurrentNode().getNeighbours()) {
               if(child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length()*2)) && !path.contains(child)){
                state.moveTo(child);
-               state.pickUpGold();
-               
+               state.pickUpGold();  
                for (Node subChild : state.getCurrentNode().getNeighbours()) {
                  if(subChild.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length()*2) + (child.getEdge(subChild).length()*2)) && !path.contains(subChild)){
                    state.moveTo(subChild);
@@ -291,26 +266,19 @@ public class Explorer {
                    state.moveTo(child);
                   }
                 }
-                
                state.moveTo(node);
            }
          }
-
       }
     }    
-
-     int gold = 0;
-     for (Node node : nodes) {
-       gold += node.getTile().getOriginalGold();   
-      }
-
-      /* System.out.println("--- Efficiency --- ");
-      System.out.println(">> Total Gold: " + gold);
-      System.out.println(">> Initial Time: " + startTime);
-      System.out.println(">> Time Remaining: " + state.getTimeRemaining()); */
-
    }
 
+/**
+ * Gets the closest node as measured by the getDistance method.
+ *
+ * @param nodes A set of nodes from which the closest is selected.
+ * @return min The closest node
+ */
 private Node getMin(Set<Node> nodes) {
   Node min= null;
   for (Node node : nodes) {
@@ -325,18 +293,28 @@ private Node getMin(Set<Node> nodes) {
   return min;
  }
 
+/**
+ * Finds the closest neighbour node to a given node and adds the path
+ * to the List.
+ *
+ * @param node A node for which to find the nearest neighbour
+ */
 private void findShortestRoute(Node node) {
    Set<Node> neighbours = node.getNeighbours();
    for (Node neighbour : neighbours) {
-      //System.out.println(node.getTile().getGold());
-      if (getDistance(neighbour) > (getDistance(node) + (3000 - node.getTile().getGold()))) { 
-         distance.put(neighbour, getDistance(node) + (3000 - node.getTile().getGold()));
+      if (getDistance(neighbour) > (getDistance(node))) { 
+         distance.put(neighbour, getDistance(node));
          prev.put(neighbour, node);
          unvisitedNodes.add(neighbour);
       }
    }
   }
 
+/**
+ * Gets distance from list where calculated or returns a maximum value
+ *
+ * @param destination A node for which to check the distance.
+ */
  private int getDistance(Node destination) {
   return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
 }
