@@ -82,7 +82,7 @@ public class Explorer {
       for (NodeStatus neighbour : state.getNeighbours()) {
         if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
           moved = true;
-           toVisit = neighbour;
+          toVisit = neighbour;
           break;
         }
       }
@@ -99,29 +99,23 @@ public class Explorer {
     }
   }
 
-  // Check all neighbours to find the least visistd node
+  // Check all neighbours to find the least visited node
   if(!moved) { 
-      for (NodeStatus neighbour : state.getNeighbours()) {
-        if(min == null){ min = neighbour; }
+    for (NodeStatus neighbour : state.getNeighbours()) {
+      if(min == null){ min = neighbour; }
         if (visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())){
           min = neighbour;
         }
       }
-        moved = true;
-        toVisit = min;
-        min = null;
-   }
+      moved = true;
+      toVisit = min;
+      min = null;
+    }
 
-        visited.add(toVisit.getId());
-        if(visitedTimes.get(toVisit.getId()) == null){
-          visitedTimes.put(toVisit.getId(), 1);
-        }
-        else
-        {
-          visitedTimes.put(toVisit.getId(), visitedTimes.get(toVisit.getId()) + 1);
-        }
-        state.moveTo(toVisit.getId()); 
-    
+   // Move to selected node
+   visited.add(toVisit.getId());
+   visitedTimes.put(toVisit.getId(),visitedTimes.get(toVisit.getId()) == null ? 1 : visitedTimes.get(toVisit.getId()) + 1);
+   state.moveTo(toVisit.getId()); 
   }
   }
 
