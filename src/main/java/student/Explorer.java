@@ -62,6 +62,7 @@ public class Explorer {
    List<Long> visited = new ArrayList<Long>();
    Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
    NodeStatus min = null;
+   NodeStatus toVisit = null;
 
    // Enter main loop (until destination is found)
    while(state.getDistanceToTarget() > 0){
@@ -71,15 +72,7 @@ public class Explorer {
     for (NodeStatus neighbour : state.getNeighbours()) {
       if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
         moved = true;
-        visited.add(neighbour.getId());
-        if(visitedTimes.get(neighbour.getId()) == null){
-          visitedTimes.put(neighbour.getId(), 1);
-        }
-        else
-        {
-          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
-        }
-        state.moveTo(neighbour.getId()); 
+        toVisit = neighbour;
         break;
       }
     }
@@ -89,15 +82,7 @@ public class Explorer {
       for (NodeStatus neighbour : state.getNeighbours()) {
         if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
           moved = true;
-          visited.add(neighbour.getId());
-          if(visitedTimes.get(neighbour.getId()) == null){
-            visitedTimes.put(neighbour.getId(), 1);
-          }
-          else
-          {
-            visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
-          }
-          state.moveTo(neighbour.getId());
+           toVisit = neighbour;
           break;
         }
       }
@@ -106,18 +91,9 @@ public class Explorer {
   	// Check all neighbours to find an unvisited node
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
-
        if(!visited.contains(neighbour.getId())){
         moved = true;
-        visited.add(neighbour.getId());
-        if(visitedTimes.get(neighbour.getId()) == null){
-          visitedTimes.put(neighbour.getId(), 1);
-        }
-        else
-        {
-          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
-        }
-        state.moveTo(neighbour.getId());
+        toVisit = neighbour;
         break;
       }
     }
@@ -132,19 +108,19 @@ public class Explorer {
         }
       }
         moved = true;
-        visited.add(min.getId());
-        if(visitedTimes.get(min.getId()) == null){
-          visitedTimes.put(min.getId(), 1);
-        }
-        else
-        {
-          if(visitedTimes.get(min.getId()) + 1 > max) { max = visitedTimes.get(min.getId()) + 1; }
-          visitedTimes.put(min.getId(), visitedTimes.get(min.getId()) + 1);
-        }
-        state.moveTo(min.getId());
+        toVisit = min;
         min = null;
    }
 
+        visited.add(toVisit.getId());
+        if(visitedTimes.get(toVisit.getId()) == null){
+          visitedTimes.put(toVisit.getId(), 1);
+        }
+        else
+        {
+          visitedTimes.put(toVisit.getId(), visitedTimes.get(toVisit.getId()) + 1);
+        }
+        state.moveTo(toVisit.getId()); 
     
   }
   }
@@ -179,7 +155,7 @@ public class Explorer {
     List<Node> path = dijkstra(state);
 
     // Calculates the time (distance) it will take to reach the exit. Leave some space for later exploration.
-    int capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode()) - 150;
+    int capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode()) - 250;
 
     // Calculates an additional path (leaving time to escape) that explores for gold in the vicinity
     List<Node> goldPath = new ArrayList<Node>();
@@ -233,7 +209,6 @@ public class Explorer {
 	path = dijkstra(state);
 
 	capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode());
-	System.out.println("Capacity: " + capacity);
 
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
