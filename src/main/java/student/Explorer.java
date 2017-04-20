@@ -62,11 +62,11 @@ public class Explorer {
     NodeStatus min = null;
     NodeStatus toVisit = null;
 
-    // Enter main loop (until destination is found)
+    // Enter main loop (until destination is found).
     while (state.getDistanceToTarget() > 0) {
       moved = false;
 
-      // Check all neighbours to find an unvisisted node that is closer to the target
+      // Check all neighbours to find an unvisisted node that is closer to the target.
       for (NodeStatus neighbour : state.getNeighbours()) {
         if (neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited(neighbour)) {
           moved = true;
@@ -75,7 +75,7 @@ public class Explorer {
         }
       }
 
-      // Check all neighbours to find an unvisisted node that is the same distance to the target
+      // Check all neighbours to find an unvisisted node that is the same distance to the target.
       if (!moved) { 
         for (NodeStatus neighbour : state.getNeighbours()) {
           if (neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited(neighbour)) {
@@ -86,7 +86,7 @@ public class Explorer {
         }
       }
 
-      // Check all neighbours to find an unvisited node
+      // Check all neighbours to find an unvisited node.
       if (!moved) { 
         for (NodeStatus neighbour : state.getNeighbours()) {
           if (!visited(neighbour)) {
@@ -97,7 +97,7 @@ public class Explorer {
         }
       }
 
-      // Check all neighbours to find the least visited node
+      // Check all neighbours to find the least visited node.
       if (!moved) { 
         for (NodeStatus neighbour : state.getNeighbours()) {
           if (min == null || visitedTimes.get(neighbour.getId()) < visitedTimes.get(min.getId())) {
@@ -109,7 +109,7 @@ public class Explorer {
         min = null;
       }
 
-      // Move to selected node
+      // Move to selected node.
       visitedTimes.put(toVisit.getId(),!visited(toVisit) ? 1 : visitedTimes.get(toVisit.getId()) + 1);
       state.moveTo(toVisit.getId()); 
     }
@@ -141,14 +141,13 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
-    // Implements Dijkstra's algorithm to find shortest path to exit from current location
+    // Implements Dijkstra's algorithm to find shortest path to exit from current location.
     List<Node> path = dijkstra(state);
 
-    // Calculates the time (distance) it will take to reach the exit. 
-    // Leave some space for later exploration / straying.
+    // Calculates the time (distance) it will take to reach the exit. Leave time to stray.
     int capacity = state.getTimeRemaining() - lengthRemain(state.getCurrentNode()) - 250;
 
-    // Calculates an additional path (leaving time to escape) that explores for gold in the vicinity
+    // Calculates an additional path (leaving time to escape) that explores for gold in the vicinity.
     List<Node> goldPath = new ArrayList<Node>();
     Node goldStep = state.getCurrentNode();
     boolean reachedLimit = false;
@@ -181,7 +180,7 @@ public class Explorer {
       state.pickUpGold();
     }
 
-    // Follow the path to find the gold 
+    // Follow the path to find the gold.
     for (Node node : goldPath) {
       if (!(node == state.getCurrentNode())) {
         state.moveTo(node);
@@ -191,7 +190,7 @@ public class Explorer {
       }
     }
 
-    // Calculates new route to the exit
+    // Calculates new route to the exit.
     path = dijkstra(state);
 
     // Follows path
@@ -229,7 +228,7 @@ public class Explorer {
    * Finds the closest neighbour node to a given node and adds the path
    * to the List.
    *
-   * @param node A node for which to find the nearest neighbour
+   * @param node A node for which to find the nearest neighbour.
    */
   private void findShortestRoute(Node node) {
     Set<Node> neighbours = node.getNeighbours();
@@ -270,8 +269,8 @@ public class Explorer {
   /**
    * Calculates and returns the path to the exit using Dijkstra's algorithm.
    *
-   * @param state the EscapeState to allow the method to calculate relevant locations
-   * @return path a List of nodes providing a path to the exit
+   * @param state the EscapeState to allow the method to calculate relevant locations.
+   * @return path a List of nodes providing a path to the exit.
    */
   private List<Node> dijkstra(EscapeState state) {
     distance.put(state.getExit(), 0);
