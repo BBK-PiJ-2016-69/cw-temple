@@ -57,9 +57,7 @@ public class Explorer {
    */
  public void explore(ExplorationState state) {
     
-    List visited = new ArrayList();
-    List toVisit = new ArrayList();
-
+    List<Long> visited = new ArrayList<Long>();
     int max = 0;
     NodeStatus min = null;
     Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
@@ -185,7 +183,7 @@ public class Explorer {
        findShortestRoute(node);
     }
 
-    List<Node> path = new ArrayList();
+    List<Node> path = new ArrayList<Node>();
     Node step = state.getCurrentNode();
     path.add(step);
     while (prev.get(step) != null) {
@@ -195,7 +193,7 @@ public class Explorer {
 
     int capacity = startTime - lengthRemaining(state.getCurrentNode());
 
-    List<Node> goldPath = new ArrayList();
+    List<Node> goldPath = new ArrayList<Node>();
 
     Node goldStep = state.getCurrentNode();
     boolean reachedLimit = false;
@@ -314,11 +312,18 @@ private void findShortestRoute(Node node) {
  * Gets distance from list where calculated or returns a maximum value
  *
  * @param destination A node for which to check the distance.
+ * @return The distance or a maximum integer value where not found.
  */
  private int getDistance(Node destination) {
   return (distance.get(destination) == null) ? Integer.MAX_VALUE : distance.get(destination);
 }
 
+/**
+ * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+ *
+ * @param currentNode The length of the path from this node to the exit will be returned.
+ * @return length The length of the path from the given node to the exit.
+ */
  private int lengthRemaining(Node currentNode) {
   int length = 0;
 
