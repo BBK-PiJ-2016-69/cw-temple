@@ -19,11 +19,11 @@ import java.util.TreeMap;
 
 public class Explorer {
 
-  Set<Node> visitedNodes = new HashSet<Node>();
-  Set<Node> unvisitedNodes = new HashSet<Node>();
-  Map<Node, Integer> distance = new HashMap<Node, Integer>();
-  Map<Node, Node> prev = new HashMap<Node, Node>();
-  List<Node> nodes = null;
+  private Set<Node> visitedNodes = new HashSet<Node>();
+  private Set<Node> unvisitedNodes = new HashSet<Node>();
+  private Map<Node, Integer> distance = new HashMap<Node, Integer>();
+  private Map<Node, Node> prev = new HashMap<Node, Node>();
+  private List<Node> nodes = null;
 
   /**
    * Explore the cavern, trying to find the orb in as few steps as possible.
@@ -56,17 +56,20 @@ public class Explorer {
    * @param state the information available at the current state
    */
  public void explore(ExplorationState state) {
-    
-    List<Long> visited = new ArrayList<Long>();
-    int max = 0;
-    NodeStatus min = null;
-    Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
-    boolean moved;
-    for(int i=0; state.getDistanceToTarget() > 0 && i < 100000; i++){
-      moved = false;
-      i++;
-      for (NodeStatus neighbour : state.getNeighbours()) {
-       if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
+
+   boolean moved;
+   int max = 0;
+   List<Long> visited = new ArrayList<Long>();
+   Map<Long, Integer> visitedTimes = new TreeMap<Long, Integer>();
+   NodeStatus min = null;
+
+   // Enter main loop (until destination is found)
+   while(state.getDistanceToTarget() > 0){
+    moved = false;
+
+    // Check all neighbours to find an unvisisted node that is closer to the target
+    for (NodeStatus neighbour : state.getNeighbours()) {
+      if(neighbour.getDistanceToTarget() < state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
         moved = true;
         visited.add(neighbour.getId());
         if(visitedTimes.get(neighbour.getId()) == null){
@@ -76,30 +79,31 @@ public class Explorer {
         {
           visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
         }
-        state.moveTo(neighbour.getId());
-       
+        state.moveTo(neighbour.getId()); 
         break;
       }
     }
 
+    // Check all neighbours to find an unvisisted node that is the same distance to the target
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
-       if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
-        moved = true;
-        visited.add(neighbour.getId());
-        if(visitedTimes.get(neighbour.getId()) == null){
-          visitedTimes.put(neighbour.getId(), 1);
+        if(neighbour.getDistanceToTarget() == state.getDistanceToTarget() && !visited.contains(neighbour.getId())){
+          moved = true;
+          visited.add(neighbour.getId());
+          if(visitedTimes.get(neighbour.getId()) == null){
+            visitedTimes.put(neighbour.getId(), 1);
+          }
+          else
+          {
+            visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
+          }
+          state.moveTo(neighbour.getId());
+          break;
         }
-        else
-        {
-          visitedTimes.put(neighbour.getId(), visitedTimes.get(neighbour.getId()) + 1);
-        }
-        state.moveTo(neighbour.getId());
-        break;
       }
     }
-  }
 
+  	// Check all neighbours to find an unvisited node
     if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
 
@@ -119,6 +123,7 @@ public class Explorer {
     }
   }
 
+  // Check all neighbours to find the least visistd node
   if(!moved) { 
       for (NodeStatus neighbour : state.getNeighbours()) {
         if(min == null){ min = neighbour; }
@@ -170,31 +175,14 @@ public class Explorer {
    */
   public void escape(EscapeState state) {
     
-    int startTime = state.getTimeRemaining();
+    // Implements Dijkstra's algorithm to find shortest path to exit from current location
+    List<Node> path = dijkstra(state);
 
-     /* Dijkstra implementation  */
-     nodes = new ArrayList<Node>(state.getVertices());
-     distance.put(state.getExit(), 0);
-     unvisitedNodes.add(state.getExit());
-     while (unvisitedNodes.size() > 0) {
-       Node node = getMin(unvisitedNodes);
-       visitedNodes.add(node);
-       unvisitedNodes.remove(node);
-       findShortestRoute(node);
-    }
+    // Calculates the time (distance) it will take to reach the exit. Leave some space for later exploration.
+    int capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode()) - 150;
 
-    List<Node> path = new ArrayList<Node>();
-    Node step = state.getCurrentNode();
-    path.add(step);
-    while (prev.get(step) != null) {
-      step = prev.get(step);
-      path.add(step);
-    }
-
-    int capacity = startTime - lengthRemaining(state.getCurrentNode());
-
+    // Calculates an additional path (leaving time to escape) that explores for gold in the vicinity
     List<Node> goldPath = new ArrayList<Node>();
-
     Node goldStep = state.getCurrentNode();
     boolean reachedLimit = false;
     goldPath.add(goldStep);
@@ -226,25 +214,26 @@ public class Explorer {
   i++;
   }
 
+  if(state.getCurrentNode().getTile().getGold() > 0){
+       state.pickUpGold();
+     }
+
+  // Follow the path to find the gold 
   for (Node node : goldPath) {
       if(!(node == state.getCurrentNode())){
         state.moveTo(node);
-        if(node.getTile().getGold() > 0){
-          state.pickUpGold();
+        if(state.getCurrentNode().getTile().getGold() > 0){
+         state.pickUpGold();
         }
       }
   }
 
-  Collections.reverse(goldPath);
 
-  for (Node node : goldPath) {
-      if(!(node == state.getCurrentNode())){
-        state.moveTo(node);
-        if(node.getTile().getGold() > 0){
-          state.pickUpGold();
-        }
-      }
-  }
+  // Calculates new route to the exit
+	path = dijkstra(state);
+
+	capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode());
+	System.out.println("Capacity: " + capacity);
 
     for (Node node : path) {
       if(!(node == state.getCurrentNode())){
@@ -267,7 +256,7 @@ public class Explorer {
                state.moveTo(node);
            }
          }
-      }
+       }
     }    
    }
 
@@ -332,6 +321,33 @@ private void findShortestRoute(Node node) {
       currentNode = prev.get(currentNode);
     }
   return length;
+ }
+
+ /**
+ * Gets the length of the remainder of the path to the door via Dijkstra's algorithm
+ *
+ * @param state the EscapeState to allow the method to calculate relevant locations
+ * @return path a List of nodes providing a path to the exit
+ */
+ private List<Node> dijkstra(EscapeState state){
+ 	nodes = new ArrayList<Node>(state.getVertices());
+     distance.put(state.getExit(), 0);
+     unvisitedNodes.add(state.getExit());
+     while (unvisitedNodes.size() > 0) {
+       Node node = getMin(unvisitedNodes);
+       visitedNodes.add(node);
+       unvisitedNodes.remove(node);
+       findShortestRoute(node);
+    }
+
+    List<Node> path = new ArrayList<Node>();
+    Node step = state.getCurrentNode();
+    path.add(step);
+    while (prev.get(step) != null) {
+      step = prev.get(step);
+      path.add(step);
+    }
+    return path;
  }
 }
 
