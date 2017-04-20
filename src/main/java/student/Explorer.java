@@ -144,8 +144,9 @@ public class Explorer {
     // Implements Dijkstra's algorithm to find shortest path to exit from current location
     List<Node> path = dijkstra(state);
 
-    // Calculates the time (distance) it will take to reach the exit. Leave some space for later exploration.
-    int capacity = state.getTimeRemaining() - lengthRemaining(state.getCurrentNode()) - 250;
+    // Calculates the time (distance) it will take to reach the exit. 
+    // Leave some space for later exploration / straying.
+    int capacity = state.getTimeRemaining() - lengthRemain(state.getCurrentNode()) - 250;
 
     // Calculates an additional path (leaving time to escape) that explores for gold in the vicinity
     List<Node> goldPath = new ArrayList<Node>();
@@ -201,7 +202,7 @@ public class Explorer {
           state.pickUpGold();
         }
 
-        // Explores around the target path if there is enough capacity and there is gold to be gathered
+        // Explores around the target path if there is time and there is gold to be gathered.
         stray(state, path, node);
         
       }
@@ -257,7 +258,7 @@ public class Explorer {
    * @param currentNode The length of the path from this node to the exit will be returned.
    * @return length The length of the path from the given node to the exit.
    */
-  private int lengthRemaining(Node currentNode) {
+  private int lengthRemain(Node currentNode) {
     int length = 0;
     while (prev.get(currentNode) != null) {
       length += currentNode.getEdge(prev.get(currentNode)).length();
@@ -306,6 +307,18 @@ public class Explorer {
   }
 
   /**
+   * Returns true if there is time left to travel between the nodes.
+   *
+   * @param state The current state of the game.
+   * @param nodeOne The first node to check.
+   * @param nodeTwo The second node to calculate if there is time to visit from nodeOne.
+   * @return true if there is time left to travel between the nodes.
+   */
+  private boolean canVisit(EscapeState state, Node node1, Node node2) {
+    return state.getTimeRemaining() > (lengthRemain(node1) + (node2.getEdge(node1).length() * 2));
+  }
+
+  /**
    * Recursive function to stray from the path in search of gold.
    *
    * @param state The current state of the game.
@@ -314,7 +327,7 @@ public class Explorer {
    */
   private void stray(EscapeState state, List path, Node node) {
     for (Node child : state.getCurrentNode().getNeighbours()) {
-      if (child.getTile().getGold() > 0 && state.getTimeRemaining() > (lengthRemaining(node) + (child.getEdge(node).length() * 2)) && !path.contains(child)) {
+      if (child.getTile().getGold() > 0 && canVisit(state, node, child) && !path.contains(child)) {
         state.moveTo(child);
         state.pickUpGold();  
         stray(state, path, child);
@@ -322,4 +335,4 @@ public class Explorer {
       }
     }
   }
-}	
+}
